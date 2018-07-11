@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, render_to_response
 from django.http import Http404
 
 from django.contrib.syndication.views import Feed
@@ -8,22 +8,20 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from article.models import Article
 
-from datetime import datetime
-
 
 # Create your views here.
 
 
 def home(request):
     posts = Article.objects.all()
-    paginator = Paginator(posts, 2)  # 每页显示两个
+    paginator = Paginator(posts, 5)  # 每页显示五个
     page = request.GET.get('page')
     try:
         post_list = paginator.page(page)
     except PageNotAnInteger:
         post_list = paginator.page(1)
     except EmptyPage:
-        post_list = paginator.paginator(paginator.num_pages)
+        post_list = paginator.page(paginator.num_pages)
     return render(request, 'home.html', {'post_list': post_list})
 
 
@@ -85,3 +83,11 @@ class RSSFeed(Feed):
 
     def item_description(self, item):
         return item.content
+
+
+def page_not_found(request):
+    return render_to_response('404.html')
+
+
+def page_error(request):
+    return render_to_response('500.html')
